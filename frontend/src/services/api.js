@@ -34,6 +34,8 @@ export const getMe = () => API.get('/auth/me');
 export const updateProfile = (formData) => API.put('/auth/profile', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
 export const updateResume = (formData) => API.put('/auth/profile/resume', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
 export const changePassword = (data) => API.put('/auth/change-password', data);
+export const forgotPassword = (data) => API.post('/auth/forgot-password', data);
+export const resetPassword = (data) => API.post('/auth/reset-password', data);
 
 // ── JOBS ─────────────────────────────────────────────
 export const getJobs = (params) => API.get('/jobs', { params });

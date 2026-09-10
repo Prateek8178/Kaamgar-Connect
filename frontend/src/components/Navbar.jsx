@@ -148,9 +148,6 @@ const Navbar = () => {
                       </Link>
                     </li>
                     <li><Link className="dropdown-item" to="/change-password"><i className="bi bi-shield-lock"></i> Change Password</Link></li>
-                    {(user?.isStaff || user?.role === 'admin') && (
-                      <li><Link className="dropdown-item" to="/admin"><i className="bi bi-speedometer2"></i> Admin Panel</Link></li>
-                    )}
                     <li><hr className="dropdown-divider" /></li>
                     <li>
                       <a className="dropdown-item text-danger" href="#logout" onClick={handleLogout}>

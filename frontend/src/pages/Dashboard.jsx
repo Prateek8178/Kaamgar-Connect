@@ -29,12 +29,15 @@ const WorkerDashboard = ({ data }) => {
       {completion < 100 && (
         <div className="kc-card mb-4" style={{ borderLeft: '4px solid var(--p)' }}>
           <div className="d-flex align-items-center gap-3 flex-wrap">
+            <div className="kc-avatar kc-avatar-sm flex-shrink-0" style={{ background: 'var(--p)', color: '#fff', fontWeight: 700 }}>
+              {user?.profilePhoto ? <img src={user.profilePhoto} alt="" /> : avatarInitial}
+            </div>
             <div className="flex-grow-1">
               <div className="fw-700 mb-1"><i className="bi bi-bar-chart-steps me-2" style={{ color: 'var(--p)' }}></i>Complete Your Profile</div>
               <div className="progress" style={{ height: '8px', borderRadius: '4px', background: 'var(--bg)' }}>
                 <div className="progress-bar" role="progressbar" style={{ width: `${completion}%`, background: 'var(--p)', borderRadius: '4px' }}></div>
               </div>
-              <div className="small text-muted mt-1">{completion}% complete — finish your profile to get more job offers</div>
+              <div className="small text-muted mt-1">{completion}% complete{wp?.skills?.length ? ` — Skills: ${wp.skills.slice(0,3).join(', ')}` : ' — finish your profile to get more job offers'}</div>
             </div>
             <Link to="/profile" className="btn btn-primary btn-sm btn-pill px-4">Complete Profile</Link>
           </div>

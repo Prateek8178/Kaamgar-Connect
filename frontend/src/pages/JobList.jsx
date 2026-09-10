@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useSearchParams, useNavigate } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { getJobs, toggleSaveJob } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { FullLayout } from '../layouts/MainLayout';
@@ -85,7 +85,8 @@ const JobList = () => {
   const [meta, setMeta] = useState({});
   const [categories, setCategories] = useState([]);
   const [jobTypes, setJobTypes] = useState([]);
-  const [expChoices, setExpChoices] = useState([]);
+  // expChoices fetched from API — reserved for future experience-level filter UI
+  const [, setExpChoices] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const filters = {
@@ -98,6 +99,7 @@ const JobList = () => {
     page: searchParams.get('page') || '1',
   };
 
+  const searchKey = searchParams.toString();
   useEffect(() => {
     setLoading(true);
     getJobs(filters).then(r => {
@@ -107,7 +109,8 @@ const JobList = () => {
       setJobTypes(r.data.jobTypes || []);
       setExpChoices(r.data.expChoices || []);
     }).catch(() => {}).finally(() => setLoading(false));
-  }, [searchParams.toString()]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchKey]);
 
   const update = (key, val) => {
     const p = new URLSearchParams(searchParams);

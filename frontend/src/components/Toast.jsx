@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+// Toast utility — plain JS object, no React hooks needed
 
 let toastCounter = 0;
 

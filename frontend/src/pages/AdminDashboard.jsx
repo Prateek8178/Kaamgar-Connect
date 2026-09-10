@@ -31,6 +31,11 @@ const AdminDashboard = () => {
 
   return (
     <MainLayout>
+      {loading && !data && (
+        <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '40vh' }}>
+          <div className="spinner-border text-primary" role="status"><span className="visually-hidden">Loading...</span></div>
+        </div>
+      )}
       <div className="mb-4">
         <h1 className="fw-800 mb-1" style={{ fontSize: '1.5rem' }}><i className="bi bi-speedometer2 me-2" style={{ color: 'var(--p)' }}></i>Admin Dashboard</h1>
         <div className="d-flex gap-2 mt-2">

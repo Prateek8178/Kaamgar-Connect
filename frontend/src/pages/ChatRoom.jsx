@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getChatRoom, sendMessage as sendMsg, pollMessages } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -40,7 +40,7 @@ const ChatRoom = () => {
       })
       .catch(() => navigate('/chat'))
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [id, navigate]);
 
   // Socket.io
   useEffect(() => {
@@ -77,7 +77,8 @@ const ChatRoom = () => {
     });
 
     return () => { socket.disconnect(); clearTimeout(typingTimer.current); };
-  }, [id, token]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, token, user?._id]);
 
   // Polling fallback (for when socket is not connected)
   useEffect(() => {
@@ -214,6 +215,7 @@ const ChatRoom = () => {
                   <div className="kc-msg theirs mb-2">
                     <div className="kc-msg-avatar">…</div>
                     <div className="kc-msg-bubble kc-typing">
+                      {typingUser && <span style={{ fontSize: '.72rem', marginRight: '6px' }}>{typingUser}</span>}
                       <span></span><span></span><span></span>
                     </div>
                   </div>

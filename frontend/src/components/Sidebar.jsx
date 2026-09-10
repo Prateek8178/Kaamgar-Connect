@@ -70,9 +70,6 @@ const Sidebar = ({ stats = {} }) => {
             <Link to="/workers" className={`sidebar-link ${isActive('/workers') ? 'active' : ''}`}>
               <i className="bi bi-people-fill"></i><span>Find Workers</span>
             </Link>
-            <Link to="/analytics" className={`sidebar-link ${isActive('/analytics') ? 'active' : ''}`}>
-              <i className="bi bi-bar-chart-fill"></i><span>Analytics</span>
-            </Link>
           </>
         )}
 
@@ -92,15 +89,6 @@ const Sidebar = ({ stats = {} }) => {
         <Link to="/change-password" className={`sidebar-link ${isActive('/change-password') ? 'active' : ''}`}>
           <i className="bi bi-shield-lock-fill"></i><span>Security</span>
         </Link>
-
-        {(user?.isStaff || user?.role === 'admin') && (
-          <>
-            <div className="sidebar-section-label">Admin</div>
-            <Link to="/admin" className={`sidebar-link ${isActive('/admin') ? 'active' : ''}`}>
-              <i className="bi bi-speedometer2"></i><span>Admin Panel</span>
-            </Link>
-          </>
-        )}
 
         <div style={{ marginTop: 'auto', paddingTop: '1rem' }}>
           <a href="#logout" className="sidebar-link" style={{ color: 'var(--danger)' }} onClick={handleLogout}>

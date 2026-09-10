@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { getMyJobs, deleteJob, toggleJob, postJob, editJob, getJobDetail } from '../services/api';
+import { Link } from 'react-router-dom';
+import { getMyJobs, deleteJob, toggleJob } from '../services/api';
 import MainLayout from '../layouts/MainLayout';
 import Toast from '../components/Toast';
 
-const CATEGORIES = ['construction','electrical','plumbing','carpentry','painting','driving','cooking','cleaning','security','welding','ac_tech','tailoring','other'];
+
 const CATEGORY_LABELS = { construction:'Construction',electrical:'Electrical',plumbing:'Plumbing',carpentry:'Carpentry',painting:'Painting',driving:'Driving',cooking:'Cooking',cleaning:'Cleaning',security:'Security',welding:'Welding',ac_tech:'AC Technician',tailoring:'Tailoring',other:'Other' };
 
 const MyJobs = () => {

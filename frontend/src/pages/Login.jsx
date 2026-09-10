@@ -86,6 +86,11 @@ const Login = () => {
                   <i className={`bi bi-eye${showPwd ? '-slash' : ''}`}></i>
                 </button>
               </div>
+              <div className="text-end mt-1">
+                <Link to="/forgot-password" className="small fw-600" style={{ color: 'var(--p)', textDecoration: 'none' }}>
+                  <i className="bi bi-question-circle me-1"></i>Forgot Password?
+                </Link>
+              </div>
             </div>
             <button id="loginBtn" type="submit" className="btn btn-primary w-100 btn-pill" disabled={loading}>
               {loading ? <><span className="spinner-border spinner-border-sm me-2"></span>Signing in…</> : <><i className="bi bi-box-arrow-in-right me-2"></i>Sign In</>}

@@ -1,7 +1,7 @@
 const User = require('../models/User');
 const WorkerProfile = require('../models/WorkerProfile');
 const { generateToken } = require('../middlewares/authMiddleware');
-const { sendOtpEmail } = require('../services/emailService');
+const { sendOtpEmail, sendPasswordResetEmail } = require('../services/emailService');
 
 // @desc   Register new user
 // @route  POST /api/auth/register
@@ -65,9 +65,13 @@ const verifyOtp = async (req, res) => {
     if (!user.isActive) { user.isActive = true; }
     await user.save();
 
-    // Create worker profile if worker
+    // Create worker profile if worker — wrapped in try-catch so it doesn't block login
     if (user.role === 'worker') {
-      await WorkerProfile.findOneAndUpdate({ user: user._id }, { user: user._id }, { upsert: true, new: true });
+      try {
+        await WorkerProfile.findOneAndUpdate({ user: user._id }, { user: user._id }, { upsert: true, new: true });
+      } catch (profileErr) {
+        console.error('⚠️  WorkerProfile creation error (non-fatal):', profileErr.message);
+      }
     }
 
     const token = generateToken(user._id, user.role);
@@ -246,4 +250,78 @@ const sanitizeUser = (user) => ({
   createdAt: user.createdAt,
 });
 
-module.exports = { register, verifyOtp, resendOtp, login, getMe, updateProfile, changePassword };
+// @desc   Forgot Password — email se OTP bhejo
+// @route  POST /api/auth/forgot-password
+const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ message: 'Email required.' });
+
+    const user = await User.findOne({ email: email.toLowerCase().trim() }).select('+otp +otpCreatedAt +otpVerified');
+    // Security: always return success even if user not found
+    if (!user) {
+      return res.json({ message: 'If this email is registered, you will receive an OTP shortly.', pendingUserId: null });
+    }
+
+    const otp = user.generateOtp();
+    await user.save();
+
+    let emailSent = false;
+    try {
+      emailSent = await sendPasswordResetEmail(user, otp);
+    } catch (e) {
+      console.error('Password reset email error:', e.message);
+    }
+
+    if (!emailSent) {
+      console.warn(`⚠️  Password Reset OTP for ${user.email}: ${otp}`);
+    }
+
+    res.json({
+      message: 'OTP sent to your email. Please check your inbox.',
+      pendingUserId: user._id,
+      email: user.email,
+      emailSent,
+    });
+  } catch (err) {
+    console.error('forgotPassword error:', err);
+    res.status(500).json({ message: 'Server error. Please try again.' });
+  }
+};
+
+// @desc   Reset Password — OTP verify karke naaya password set karo
+// @route  POST /api/auth/reset-password
+const resetPassword = async (req, res) => {
+  try {
+    const { userId, otp, newPassword } = req.body;
+    if (!userId || !otp || !newPassword) {
+      return res.status(400).json({ message: 'User ID, OTP and new password are required.' });
+    }
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: 'Password must be at least 6 characters.' });
+    }
+
+    const user = await User.findById(userId).select('+password +otp +otpCreatedAt +otpVerified');
+    if (!user) return res.status(404).json({ message: 'User not found.' });
+
+    if (!user.verifyOtp(otp)) {
+      return res.status(400).json({ message: 'Invalid or expired OTP. Please try again.' });
+    }
+
+    user.password = newPassword;
+    if (!user.isActive) user.isActive = true;
+    await user.save();
+
+    const token = generateToken(user._id, user.role);
+    res.json({
+      message: 'Password reset successfully! You are now logged in.',
+      token,
+      user: sanitizeUser(user),
+    });
+  } catch (err) {
+    console.error('resetPassword error:', err);
+    res.status(500).json({ message: 'Server error. Please try again.' });
+  }
+};
+
+module.exports = { register, verifyOtp, resendOtp, login, getMe, updateProfile, changePassword, forgotPassword, resetPassword };

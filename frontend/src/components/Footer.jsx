@@ -18,9 +18,9 @@ const Footer = () => {
               India's trusted local job marketplace — connecting skilled workers with employers across Bhopal, Indore &amp; beyond.
             </p>
             <div className="d-flex gap-2">
-              <a href="#" className="kc-social-btn"><i className="bi bi-twitter-x"></i></a>
-              <a href="#" className="kc-social-btn"><i className="bi bi-linkedin"></i></a>
-              <a href="#" className="kc-social-btn"><i className="bi bi-instagram"></i></a>
+              <button type="button" className="kc-social-btn" aria-label="Twitter / X"><i className="bi bi-twitter-x"></i></button>
+              <button type="button" className="kc-social-btn" aria-label="LinkedIn"><i className="bi bi-linkedin"></i></button>
+              <button type="button" className="kc-social-btn" aria-label="Instagram"><i className="bi bi-instagram"></i></button>
               <a href="mailto:hello@kaamgar.com" className="kc-social-btn"><i className="bi bi-envelope"></i></a>
             </div>
           </div>
@@ -41,7 +41,7 @@ const Footer = () => {
               <li><a href="#about" className="footer-link">About Us</a></li>
               <li><a href="#team" className="footer-link">Our Team</a></li>
               <li><a href="#contact" className="footer-link">Contact</a></li>
-              <li><a href="#" className="footer-link">Privacy Policy</a></li>
+              <li><span className="footer-link" style={{ cursor: 'default' }}>Privacy Policy</span></li>
             </ul>
           </div>
           <div className="col-lg-4 col-md-6">
@@ -58,8 +58,8 @@ const Footer = () => {
         <div className="d-flex flex-wrap justify-content-between align-items-center py-4 gap-2" style={{ color: '#6b7280', fontSize: '.82rem' }}>
           <span>© 2025 Kaamgar Connect. All rights reserved.</span>
           <div className="d-flex gap-3">
-            <a href="#" className="footer-link">Terms</a>
-            <a href="#" className="footer-link">Privacy</a>
+            <span className="footer-link" style={{ cursor: 'default' }}>Terms</span>
+            <span className="footer-link" style={{ cursor: 'default' }}>Privacy</span>
           </div>
           <span>Made with <span style={{ color: '#e11d48' }}>♥</span> in Bhopal, India</span>
         </div>

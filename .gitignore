@@ -12,3 +12,7 @@ build/
 dist/
 
 *.log
+
+# Spring Boot
+springboot-backend/target/
+springboot-backend/.mvn/wrapper/maven-wrapper.jar
