@@ -42,13 +42,12 @@ const register = async (req, res) => {
       emailSent, // frontend ko bata sako agar email nahi gayi
     });
   } catch (err) {
-    console.error('❌ Register error:', err);
-    // MongoDB duplicate key error
+    console.error('❌ Register error full:', err.name, '|', err.message);
     if (err.code === 11000) {
       const field = Object.keys(err.keyPattern)[0];
       return res.status(400).json({ message: `${field === 'email' ? 'Email' : 'Username'} already exists.` });
     }
-    res.status(500).json({ message: 'Server error. Please try again.' });
+    res.status(500).json({ message: 'Server error. Please try again.', debug: err.message, errType: err.name });
   }
 };
 
