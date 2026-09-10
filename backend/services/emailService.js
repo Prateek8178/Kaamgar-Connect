@@ -4,7 +4,7 @@ const nodemailer = require('nodemailer');
 let _transporter = null;
 let _isEthereal = false;
 
-const getTransporter = async () => {
+const getTransporter = () => {
   if (_transporter) return _transporter;
 
   const hasGmail = !!(process.env.EMAIL_USER && process.env.EMAIL_PASS);
@@ -14,41 +14,23 @@ const getTransporter = async () => {
     _transporter = nodemailer.createTransport({
       host: process.env.EMAIL_HOST || 'smtp.gmail.com',
       port: parseInt(process.env.EMAIL_PORT) || 587,
-      secure: false, // TLS (STARTTLS)
+      secure: false,
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
       },
-      tls: {
-        rejectUnauthorized: false, // dev mein cert errors ignore
-      },
+      tls: { rejectUnauthorized: false },
+      connectionTimeout: 10000, // 10s timeout
+      greetingTimeout: 10000,
+      socketTimeout: 15000,
     });
-
-    // Startup par connection verify karein
-    try {
-      await _transporter.verify();
-      console.log('✅ Gmail SMTP connected successfully for:', process.env.EMAIL_USER);
-    } catch (verifyErr) {
-      console.error('❌ Gmail SMTP connection failed:', verifyErr.message);
-      console.error('   ➜ Check: 2-Step Verification ON + App Password (no spaces)');
-      console.error('   ➜ Current EMAIL_USER:', process.env.EMAIL_USER);
-      console.error('   ➜ Go to: https://myaccount.google.com/apppasswords');
-      // Reset so we retry next time
-      _transporter = null;
-      throw verifyErr;
-    }
+    // NOTE: No verify() here — it hangs on Render free tier (port 587 blocked)
+    console.log('📧 Gmail SMTP transporter created for:', process.env.EMAIL_USER);
   } else {
-    // Dev fallback: auto-create a free Ethereal test inbox
-    _isEthereal = true;
-    const testAccount = await nodemailer.createTestAccount();
-    _transporter = nodemailer.createTransport({
-      host: 'smtp.ethereal.email',
-      port: 587,
-      secure: false,
-      auth: { user: testAccount.user, pass: testAccount.pass },
-    });
-    console.log('📧 Email: No Gmail configured — using Ethereal test inbox');
-    console.log('   View all sent emails at → https://ethereal.email/messages');
+    // No Gmail configured — email will not be sent
+    console.warn('⚠️  No EMAIL_USER/EMAIL_PASS set — emails will be skipped');
+    _isEthereal = false;
+    _transporter = null;
   }
 
   return _transporter;
@@ -109,7 +91,11 @@ const sendOtpEmail = async (user, otp, purpose = 'register') => {
   }[purpose] || 'OTP Verification';
 
   try {
-    const transporter = await getTransporter();
+    const transporter = getTransporter();
+    if (!transporter) {
+      console.warn(`⚠️  No email transporter — OTP for ${user.email} : ${otp}`);
+      return false;
+    }
     const fromAddr = process.env.EMAIL_FROM ||
       `"Kaamgar Connect" <${process.env.EMAIL_USER}>`;
 
@@ -122,21 +108,9 @@ const sendOtpEmail = async (user, otp, purpose = 'register') => {
     });
 
     console.log(`✅ OTP email sent to ${user.email} | MessageId: ${info.messageId}`);
-
-    // Ethereal mode mein preview URL print karein
-    if (_isEthereal) {
-      const previewUrl = nodemailer.getTestMessageUrl(info);
-      console.log(`\n📧 ─────────────────────────────────────────────────────`);
-      console.log(`   OTP  : ${otp}`);
-      console.log(`   To   : ${user.email}`);
-      console.log(`   Open : ${previewUrl}`);
-      console.log(`📧 ─────────────────────────────────────────────────────\n`);
-    }
-
     return true;
   } catch (err) {
     console.error('❌ Email send error:', err.message);
-    // Console mein OTP print karo taaki development mein test ho sake
     console.log(`\n⚠️  EMAIL FAILED — OTP for ${user.email} : ${otp}\n`);
     return false;
   }
