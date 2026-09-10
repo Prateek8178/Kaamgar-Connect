@@ -9,8 +9,10 @@ const path = require('path');
 const connectDB = require('./config/db');
 const { initSocket } = require('./sockets/chatSocket');
 
-// Connect to MongoDB
-connectDB();
+// ──── STARTUP ────────────────────────────────────────
+const startServer = async () => {
+  // Wait for MongoDB to connect BEFORE accepting requests
+  await connectDB();
 
 const app = express();
 const server = http.createServer(app);
@@ -90,8 +92,14 @@ app.use('*', (req, res) => {
 });
 
 // ──── START ──────────────────────────────────────────
-const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
-  console.log(`🚀 Kaamgar Connect API running on http://localhost:${PORT}`);
-  console.log(`📡 Socket.io ready`);
+  const PORT = process.env.PORT || 5000;
+  server.listen(PORT, () => {
+    console.log(`🚀 Kaamgar Connect API running on port ${PORT}`);
+    console.log(`📡 Socket.io ready`);
+  });
+};
+
+startServer().catch(err => {
+  console.error('❌ Failed to start server:', err.message);
+  process.exit(1);
 });
