@@ -166,5 +166,4 @@ async function sendPasswordResetEmail(user, otp) {
     return false;
   }
 }
-}
 
