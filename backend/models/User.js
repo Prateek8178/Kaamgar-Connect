@@ -48,8 +48,8 @@ userSchema.methods.generateOtp = function() {
 userSchema.methods.verifyOtp = function(inputOtp) {
   if (this.otp !== inputOtp) return false;
   if (!this.otpCreatedAt) return false;
-  const fiveMinutes = 5 * 60 * 1000;
-  if (Date.now() - this.otpCreatedAt.getTime() > fiveMinutes) return false;
+  const tenMinutes = 10 * 60 * 1000;
+  if (Date.now() - this.otpCreatedAt.getTime() > tenMinutes) return false;
   this.otpVerified = true;
   this.otp = '';
   return true;
