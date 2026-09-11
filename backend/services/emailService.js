@@ -13,19 +13,18 @@ const getTransporter = () => {
     _isEthereal = false;
     _transporter = nodemailer.createTransport({
       host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-      port: parseInt(process.env.EMAIL_PORT) || 587,
-      secure: false,
+      port: parseInt(process.env.EMAIL_PORT) || 465,
+      secure: true,   // SSL (port 465)
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
       },
       tls: { rejectUnauthorized: false },
-      connectionTimeout: 10000, // 10s timeout
+      connectionTimeout: 10000,
       greetingTimeout: 10000,
       socketTimeout: 15000,
     });
-    // NOTE: No verify() here — it hangs on Render free tier (port 587 blocked)
-    console.log('📧 Gmail SMTP transporter created for:', process.env.EMAIL_USER);
+    console.log('📧 Gmail SMTP (SSL/465) transporter created for:', process.env.EMAIL_USER);
   } else {
     // No Gmail configured — email will not be sent
     console.warn('⚠️  No EMAIL_USER/EMAIL_PASS set — emails will be skipped');
