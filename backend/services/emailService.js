@@ -1,38 +1,18 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
-// ─── Transporter Cache ──────────────────────────────────────────────────────
-let _transporter = null;
-let _isEthereal = false;
+// ─── Resend Client (HTTP API — works on Render free tier) ────────────────────
+let _resend = null;
 
-const getTransporter = () => {
-  if (_transporter) return _transporter;
-
-  const hasGmail = !!(process.env.EMAIL_USER && process.env.EMAIL_PASS);
-
-  if (hasGmail) {
-    _isEthereal = false;
-    _transporter = nodemailer.createTransport({
-      host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-      port: parseInt(process.env.EMAIL_PORT) || 465,
-      secure: true,   // SSL (port 465)
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-      tls: { rejectUnauthorized: false },
-      connectionTimeout: 10000,
-      greetingTimeout: 10000,
-      socketTimeout: 15000,
-    });
-    console.log('📧 Gmail SMTP (SSL/465) transporter created for:', process.env.EMAIL_USER);
-  } else {
-    // No Gmail configured — email will not be sent
-    console.warn('⚠️  No EMAIL_USER/EMAIL_PASS set — emails will be skipped');
-    _isEthereal = false;
-    _transporter = null;
+const getResendClient = () => {
+  if (_resend) return _resend;
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    console.warn('⚠️  RESEND_API_KEY not set — emails will be skipped');
+    return null;
   }
-
-  return _transporter;
+  _resend = new Resend(apiKey);
+  console.log('📧 Resend email client ready');
+  return _resend;
 };
 
 // ─── OTP Email HTML Template ─────────────────────────────────────────────────
@@ -90,27 +70,32 @@ const sendOtpEmail = async (user, otp, purpose = 'register') => {
   }[purpose] || 'OTP Verification';
 
   try {
-    const transporter = getTransporter();
-    if (!transporter) {
-      console.warn(`⚠️  No email transporter — OTP for ${user.email} : ${otp}`);
+    const resend = getResendClient();
+    if (!resend) {
+      console.warn(`⚠️  No Resend client — OTP for ${user.email} : ${otp}`);
       return false;
     }
-    const fromAddr = process.env.EMAIL_FROM ||
-      `"Kaamgar Connect" <${process.env.EMAIL_USER}>`;
 
-    const info = await transporter.sendMail({
-      from: fromAddr,
-      to: user.email,
+    const from = process.env.EMAIL_FROM || 'Kaamgar Connect <onboarding@resend.dev>';
+
+    const { data, error } = await resend.emails.send({
+      from,
+      to: [user.email],
       subject: `[Kaamgar Connect] ${purposeText} — OTP: ${otp}`,
-      text: `Your OTP is: ${otp}. It expires in 5 minutes. Do not share it with anyone.`,
       html: getOtpEmailHtml(user, otp, purpose),
     });
 
-    console.log(`✅ OTP email sent to ${user.email} | MessageId: ${info.messageId}`);
+    if (error) {
+      console.error('❌ Resend error:', error.message);
+      console.log(`⚠️  OTP for ${user.email} : ${otp}`);
+      return false;
+    }
+
+    console.log(`✅ OTP email sent via Resend to ${user.email} | id: ${data.id}`);
     return true;
   } catch (err) {
     console.error('❌ Email send error:', err.message);
-    console.log(`\n⚠️  EMAIL FAILED — OTP for ${user.email} : ${otp}\n`);
+    console.log(`⚠️  OTP for ${user.email} : ${otp}`);
     return false;
   }
 };
@@ -157,21 +142,29 @@ async function sendPasswordResetEmail(user, otp) {
 </html>`;
 
   try {
-    const transporter = await getTransporter();
-    const fromAddr = process.env.EMAIL_FROM || `"Kaamgar Connect" <${process.env.EMAIL_USER}>`;
-    const info = await transporter.sendMail({
-      from: fromAddr,
-      to: user.email,
+    const resend = getResendClient();
+    if (!resend) {
+      console.warn(`⚠️  No Resend client — Password reset OTP for ${user.email} : ${otp}`);
+      return false;
+    }
+    const from = process.env.EMAIL_FROM || 'Kaamgar Connect <onboarding@resend.dev>';
+    const { data, error } = await resend.emails.send({
+      from,
+      to: [user.email],
       subject: `[Kaamgar Connect] Password Reset OTP: ${otp}`,
-      text: `Your password reset OTP is: ${otp}. It expires in 5 minutes.`,
       html,
     });
-    console.log(`✅ Password reset email sent to ${user.email} | MessageId: ${info.messageId}`);
+    if (error) {
+      console.error('❌ Resend error:', error.message);
+      return false;
+    }
+    console.log(`✅ Password reset email sent via Resend to ${user.email} | id: ${data.id}`);
     return true;
   } catch (err) {
     console.error('❌ Password reset email error:', err.message);
-    console.log(`\n⚠️  PASSWORD RESET OTP for ${user.email} : ${otp}\n`);
+    console.log(`⚠️  PASSWORD RESET OTP for ${user.email} : ${otp}`);
     return false;
   }
+}
 }
 
