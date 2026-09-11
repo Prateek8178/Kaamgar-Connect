@@ -19,16 +19,11 @@ const Register = () => {
     setLoading(true);
     try {
       const { data } = await register({ username: form.username, email: form.email, password: form.password, role: form.role });
-      if (data.emailSent) {
-        Toast.success('OTP sent to your email! Please verify.');
-      } else {
-        Toast.warning('Email not sent — your OTP is shown on the next screen.');
-      }
+      Toast.success('OTP sent to your email! Please verify.');
       navigate('/verify-otp', {
         state: {
           pendingUserId: data.pendingUserId,
           email: data.email,
-          emailFallbackOtp: data.otp || null,
         }
       });
     } catch (err) {

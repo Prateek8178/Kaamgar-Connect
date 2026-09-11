@@ -103,29 +103,10 @@ const VerifyOTP = () => {
             <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📧</div>
             <h1 style={{ fontSize: '1.5rem', fontWeight: 800 }}>Verify Your Email</h1>
             <p className="text-muted small">
-              {emailFallbackOtp
-                ? <>Email delivery failed. Enter this OTP:<br /></>
-                : <>We sent a 6-digit OTP to<br /></>}
+              We sent a 6-digit OTP to<br />
               <strong style={{ color: 'var(--p)' }}>{email || 'your email'}</strong>
             </p>
           </div>
-
-          {/* OTP Fallback Box — shown when email couldn't be sent */}
-          {emailFallbackOtp && (
-            <div style={{
-              background: 'rgba(99,102,241,0.12)',
-              border: '2px solid var(--p)',
-              borderRadius: '12px',
-              padding: '16px 20px',
-              marginBottom: '20px',
-            }}>
-              <div className="small text-muted mb-1">⚠️ Email not delivered — Your OTP is:</div>
-              <div style={{ fontSize: '2.2rem', fontWeight: 900, letterSpacing: '8px', color: 'var(--p)' }}>
-                {emailFallbackOtp}
-              </div>
-              <div className="small text-muted mt-1">Copy this and enter below ↓</div>
-            </div>
-          )}
 
           <div className="kc-otp-grid mb-4" onPaste={handlePaste}>
             {otp.map((d, i) => (

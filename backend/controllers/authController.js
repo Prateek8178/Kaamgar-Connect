@@ -36,14 +36,10 @@ const register = async (req, res) => {
     }
 
     res.status(201).json({
-      message: emailSent
-        ? 'OTP sent to your email. Please verify.'
-        : 'Email delivery failed. Use the OTP shown below.',
+      message: 'OTP sent to your email. Please verify.',
       pendingUserId: user._id,
       email: user.email,
       emailSent,
-      // Show OTP when email fails (Render free tier SMTP is blocked)
-      ...(emailSent ? {} : { otp }),
     });
   } catch (err) {
     console.error('❌ Register error:', err.name, '|', err.message);
