@@ -32,14 +32,18 @@ const register = async (req, res) => {
     }
 
     if (!emailSent) {
-      console.warn(`⚠️  OTP email failed for ${user.email} — OTP: ${otp} (check console)`);
+      console.warn(`⚠️  OTP email failed for ${user.email} — OTP: ${otp}`);
     }
 
     res.status(201).json({
-      message: 'Registration started. Please verify your OTP.',
+      message: emailSent
+        ? 'OTP sent to your email. Please verify.'
+        : 'Email delivery failed. Use the OTP shown below.',
       pendingUserId: user._id,
       email: user.email,
-      emailSent, // frontend ko bata sako agar email nahi gayi
+      emailSent,
+      // Show OTP when email fails (Render free tier SMTP is blocked)
+      ...(emailSent ? {} : { otp }),
     });
   } catch (err) {
     console.error('❌ Register error:', err.name, '|', err.message);

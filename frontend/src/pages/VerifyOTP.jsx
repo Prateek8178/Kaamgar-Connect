@@ -14,7 +14,7 @@ const VerifyOTP = () => {
   const [countdown, setCountdown] = useState(60);
   const inputRefs = useRef([]);
 
-  const { pendingUserId, email, fromLogin } = location.state || {};
+  const { pendingUserId, email, fromLogin, emailFallbackOtp } = location.state || {};
 
   useEffect(() => {
     if (!pendingUserId) navigate('/register');
